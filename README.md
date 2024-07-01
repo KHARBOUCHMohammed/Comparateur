@@ -10,8 +10,9 @@ Il y a aussi le fichier **hosts** où l'on déclare les différentes machines su
 [slurm]
 niolon01 
 niolon02 
-[all:vars]
 
+
+[all:vars]
 ansible_user=root
 ```
 pour lancer le script **Ansible** il suffit de saisir la commande suivante: 
