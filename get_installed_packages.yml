@@ -1,0 +1,32 @@
+---
+- name: Use get_installed_packages role and save output to a file
+  hosts: slurm
+  become: true
+  become_user: root
+  roles:
+    - role: getPackages
+      save_output_to_file: true
+  gather_facts: false
+  ignore_unreachable: true
+
+- name: Save output to local file
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Create directory if not exists
+      ansible.builtin.file:
+        path: "{{ playbook_dir }}/output"
+        state: directory
+
+    - name: Save output to local file
+      ansible.builtin.copy:
+        content: "{{ hostvars[item].dpkg_output.stdout_lines | default([]) | join('\n') }}"
+        dest: "{{ playbook_dir }}/output/{{ item }}.txt"
+      with_items: "{{ groups['slurm'] }}"
+      ignore_errors: true  # Ignorer les erreurs dans cette tâche
+
+
+
+
+
+

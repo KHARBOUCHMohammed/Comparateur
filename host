@@ -1,0 +1,29 @@
+
+
+
+[slurm]
+#niolon 
+niolon01 
+niolon02 
+niolon03 
+niolon04 
+niolon05 
+niolon06 
+niolon07 
+niolon08 
+niolon09
+niolon10
+niolon11
+niolon12
+niolon13 
+niolon14 
+niolon15 
+niolon16 
+niolon17 
+niolon18 
+#slurmdb0 is_db=yes is_interactive=null is_priority=null is_confslurm=no   
+#slurmdb1 is_db=yes is_interactive=null is_priority=null is_confslurm=no 
+
+[all:vars]
+#ansible_python_interpreter=/usr/bin/python3
+ansible_user=root
