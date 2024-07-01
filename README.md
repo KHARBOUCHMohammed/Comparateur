@@ -8,11 +8,10 @@ Il y a aussi le fichier **hosts** où l'on déclare les différentes machines su
 
 ```sh
 [slurm]
-#niolon 
 niolon01 
 niolon02 
 [all:vars]
-#ansible_python_interpreter=/usr/bin/python3
+
 ansible_user=root
 ```
 pour lancer le script **Ansible** il suffit de saisir la commande suivante: 
