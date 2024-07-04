@@ -23,73 +23,101 @@ def compare_files():
     empty_files = []
     file_vide = []
 
-    # Trouver les éléments communs à tous les fichiers
     common_elements = set()
     is_first_file = True
+    first_columns_data = {}
+
+    # Trouver les éléments communs à tous les fichiers
     for file_name_with_extension in os.listdir(dir_path):
         if file_name_with_extension.endswith(".txt"):
             file_path = os.path.join(dir_path, file_name_with_extension)
-            if os.path.getsize(file_path) == 0:  # Vérifier si le fichier est vide
-                empty_files.append(os.path.splitext(file_name_with_extension)[0])  # Ajouter le nom du fichier vide à la liste
-                continue  # Passer au fichier suivant sans traiter le fichier vide
+            file_name = os.path.splitext(file_name_with_extension)[0]
+            if os.path.getsize(file_path) == 0:    # Vérifier si le fichier est vide
+                empty_files.append(file_name)   # Ajouter le nom du fichier vide à la liste
+                continue                     # Passer au fichier suivant sans traiter le fichier vide
             with open(file_path, 'r') as file:
-                current_file_elements = {line.split()[0] for line in file if line.strip()}
+                lines = file.readlines()
+                first_column = [line.split()[0] for line in lines if line.strip()]
+                first_columns_data[file_name] = first_column
+                current_file_elements = set(first_column)
                 if is_first_file:
                     common_elements = current_file_elements
                     is_first_file = False
                 else:
                     common_elements &= current_file_elements
                 all_packages.update(current_file_elements)
-                file_contents[os.path.splitext(file_name_with_extension)[0]] = current_file_elements
+                file_contents[file_name] = current_file_elements
 
     file_vide = empty_files
     comparison_text = "Paquets communs dans tous les fichiers:\n" + "\n".join(sorted(common_elements)) + "\n\n"
-
+    
     # Exclure les éléments communs du tableau de résultats
     unique_packages = all_packages - common_elements
 
     # Après avoir identifié les fichiers vides et avant de commencer la comparaison
-    txt_files = [file_name for file_name in txt_files if os.path.splitext(file_name + '.txt')[0] not in empty_files]
+    txt_files = [file_name for file_name in txt_files if file_name not in empty_files]
+
+    # Trier les noms des fichiers par ordre alphabétique
+    txt_files_sorted = sorted(txt_files)
+
 
     # Préparation des données pour Excel avec les noms des fichiers sans l'extension '.txt'
     common_data = pd.DataFrame(sorted(common_elements), columns=["Paquets communs"])
-    unique_data_rows = [[package] + ["Oui" if package in file_contents[file_name] else "Non" for file_name in txt_files] for package in sorted(unique_packages)]
-    unique_data = pd.DataFrame(unique_data_rows, columns=["Paquet"] + txt_files)
+
+
+
+    unique_data_rows = [[package] + ["Oui" if package in file_contents[file_name] else "Non" for file_name in txt_files_sorted] for package in sorted(unique_packages)]
+    unique_data = pd.DataFrame(unique_data_rows, columns=["Paquet"] + txt_files_sorted)
 
     # Écriture dans un fichier Excel
     with pd.ExcelWriter('resultats_paquets.xlsx', engine='xlsxwriter') as writer:
         common_data.to_excel(writer, sheet_name='Paquets Communs', index=False)
         unique_data.to_excel(writer, sheet_name='Tableau Paquets', index=False)
 
-    result_table = "Paquet\t" + "\t".join(txt_files) + "\n"
+        # Trier les clés du dictionnaire par ordre alphabétique avant de créer le DataFrame
+        sorted_keys = sorted(first_columns_data.keys())
+        sorted_first_columns_data = {key: first_columns_data[key] for key in sorted_keys}
+        
+
+               # Trier les clés du dictionnaire par ordre alphabétique avant de créer le DataFrame
+        sorted_keys = sorted(first_columns_data.keys())
+        sorted_first_columns_data = {key: first_columns_data[key] for key in sorted_keys}
+        
+        first_columns_df = pd.DataFrame.from_dict(sorted_first_columns_data, orient='index').transpose()
+        first_columns_df.to_excel(writer, sheet_name='l\'ensemble des paquets', index=False)
+
+    result_table = "Paquet\t" + "\t".join(txt_files_sorted) + "\n"
     for package in sorted(unique_packages):
-        row = [package] + ["Oui" if package in file_contents[file_name] else "Non" for file_name in txt_files]
+        row = [package] + ["Oui" if package in file_contents[file_name] else "Non" for file_name in txt_files_sorted]
         result_table += "\t".join(row) + "\n"
 
-    # Affichage dans la zone de texte (facultatif)
+
+
+
+    # Affichage dans la zone de texte 
     text_output.config(state=tk.NORMAL)
     text_output.delete('1.0', tk.END)
     text_output.insert(tk.END, "les fichier ignorée \n\n")
-    text_output.insert(tk.END,file_vide )
+    text_output.insert(tk.END, file_vide)
     text_output.insert(tk.END, "\n\n")
     text_output.insert(tk.END, comparison_text)
     text_output.insert(tk.END, result_table)
     text_output.insert(tk.END, "Paquets communs et tableau des paquets écrits dans 'resultats_paquets.xlsx'")
     text_output.config(state=tk.DISABLED)
 
-
-
-
 def browse_dir():
+
     # Fonction pour sélectionner le dossier
     dir_path = filedialog.askdirectory()
     entry_dir.delete(0, tk.END)
     entry_dir.insert(0, dir_path)
 
 def copy_to_clipboard():
+
     # Fonction pour copier le texte de la zone de texte dans le presse-papiers
     text_output.clipboard_clear()
     text_output.clipboard_append(text_output.get('1.0', tk.END))
+
 
 # Création de la fenêtre principale
 root = tk.Tk()
@@ -97,19 +125,18 @@ root.title("Comparateur de fichiers texte dans un dossier")
 
 
 # Chargement de l'image du logo
-logo_img = Image.open("int.jpg")  
-logo_img = logo_img.resize((200, 100))  
+logo_img = Image.open("int.jpg")
+logo_img = logo_img.resize((200, 100))
 logo_img = ImageTk.PhotoImage(logo_img)
 
-# Cadre pour le logo
+
+# Cadre pour les entrées de dossier
 frame_logo = tk.Frame(root, bg="lightgray")
 frame_logo.pack()
-
-# Affichage du logo
 logo_label = tk.Label(frame_logo, image=logo_img, bg="lightgray")
 logo_label.pack()
 
-# Cadre pour les entrées de dossier
+
 frame_dir = tk.Frame(root, padx=10, pady=10, relief=tk.SUNKEN, borderwidth=2, bg="lightblue")
 frame_dir.pack(fill=tk.BOTH, padx=10, pady=(10, 5))
 
@@ -121,18 +148,23 @@ entry_dir.grid(row=0, column=1, padx=50)
 button_browse = tk.Button(frame_dir, text="Parcourir", command=browse_dir, bg="lightgreen")
 button_browse.grid(row=0, column=2, padx=5)
 
+
 # Bouton pour comparer les fichiers
 button_compare = tk.Button(root, text="Comparer", command=compare_files, padx=10, pady=5, bg="orange", fg="white")
 button_compare.pack(pady=5)
+
+
 
 # Zone de texte pour afficher les résultats (scrolledtext pour défilement)
 text_output = scrolledtext.ScrolledText(root, height=20, width=80, wrap=tk.WORD)
 text_output.pack(padx=20, pady=(0, 5), fill=tk.BOTH, expand=True)
 text_output.config(state=tk.NORMAL)
+
+
 # Bouton pour copier le texte
 button_copy = tk.Button(root, text="Copier le texte", command=copy_to_clipboard, padx=10, pady=5, bg="lightgreen")
 button_copy.pack(pady=(5, 10))
 
+
 # Lancement de la boucle principale
 root.mainloop()
-

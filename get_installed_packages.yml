@@ -1,32 +1,31 @@
 ---
+# Premier playbook : Utiliser le rôle get_installed_packages et sauvegarder la sortie dans un fichier
 - name: Use get_installed_packages role and save output to a file
-  hosts: slurm
-  become: true
-  become_user: root
+  hosts: slurm  
+  become: true  
+  become_user: root 
   roles:
-    - role: getPackages
-      save_output_to_file: true
-  gather_facts: false
-  ignore_unreachable: true
-
+    - role: getPackages  # Utiliser le rôle 'getPackages' pour obtenir la liste des paquets installés
+      save_output_to_file: true  # Paramètre personnalisé pour indiquer au rôle de sauvegarder la sortie dans un fichier
+  gather_facts: false  # Ne pas collecter de faits système pour accélérer l'exécution
+  ignore_unreachable: true  
+  
+# Deuxième playbook : Sauvegarder la sortie sur un fichier local
 - name: Save output to local file
-  hosts: localhost
-  gather_facts: false
+  hosts: localhost  # Appliquer ce playbook sur l'hôte local
+  gather_facts: false  # Ne pas collecter de faits système pour accélérer l'exécution
   tasks:
     - name: Create directory if not exists
       ansible.builtin.file:
-        path: "{{ playbook_dir }}/output"
-        state: directory
+        path: "{{ playbook_dir }}/output"  
+        state: directory  
+      # Cette tâche garantit que le répertoire de sortie existe avant de sauvegarder les fichiers
 
     - name: Save output to local file
       ansible.builtin.copy:
         content: "{{ hostvars[item].dpkg_output.stdout_lines | default([]) | join('\n') }}"
-        dest: "{{ playbook_dir }}/output/{{ item }}.txt"
-      with_items: "{{ groups['slurm'] }}"
-      ignore_errors: true  # Ignorer les erreurs dans cette tâche
-
-
-
-
-
-
+        # Récupérer la sortie de la commande dpkg du rôle getPackages pour chaque hôte
+        dest: "{{ playbook_dir }}/output/{{ item }}.txt"  
+      with_items: "{{ groups['slurm'] }}"  # Boucler sur chaque hôte du groupe 'slurm'
+      ignore_errors: true  
+      # Cette tâche sauvegarde la sortie de la commande dpkg de chaque hôte dans un fichier texte séparé
