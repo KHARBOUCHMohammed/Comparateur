@@ -56,41 +56,41 @@
 
 
 
-- name: Get package information
-  become: yes
-  command: dpkg-query -W -f='${Package}\n'
-  register: dpkg_output1
+# - name: Get package information
+#   become: yes
+#   command: dpkg-query -W -f='${Package}\n'
+#   register: dpkg_output1
+
+# # - name: Get package installation dates from APT logs
+# #   become: yes
+# #   shell: zgrep -B100 'install {{ item }}' /var/log/apt/history.log* | grep -E ".*Date:.*" | awk '{ $3=""; print $0 }'
+# #   with_items: "{{ dpkg_output1.stdout_lines }}"
+# #   register: apt_logs_output
+
+
+# # - name: Get package installation dates from APT logs
+# #   become: yes
+# #   shell: zgrep -B100 'install {{ item }}' /var/log/apt/history.log* | grep -E ".*Date:.*" | awk '{ $3=""; print $0 }'
+# #   with_items: "{{ dpkg_output1.stdout_lines }}"
+# #   register: apt_logs_output
+
+# # - name: Display package installation dates
+# #   debug:
+# #     msg: "Package: {{ item.item }}, Date: {{ item.stdout | regex_replace('Start-Date: ', '') }}"
+# #   with_items: "{{ apt_logs_output.results }}"
+
 
 # - name: Get package installation dates from APT logs
 #   become: yes
-#   shell: zgrep -B100 'install {{ item }}' /var/log/apt/history.log* | grep -E ".*Date:.*" | awk '{ $3=""; print $0 }'
+#   shell: >
+#     zgrep -B100 'install {{ item }}' /var/log/apt/history.log* | awk '{ $3=""; print $0 }'
 #   with_items: "{{ dpkg_output1.stdout_lines }}"
 #   register: apt_logs_output
 
 
-# - name: Get package installation dates from APT logs
-#   become: yes
-#   shell: zgrep -B100 'install {{ item }}' /var/log/apt/history.log* | grep -E ".*Date:.*" | awk '{ $3=""; print $0 }'
-#   with_items: "{{ dpkg_output1.stdout_lines }}"
-#   register: apt_logs_output
 
 # - name: Display package installation dates
 #   debug:
 #     msg: "Package: {{ item.item }}, Date: {{ item.stdout | regex_replace('Start-Date: ', '') }}"
 #   with_items: "{{ apt_logs_output.results }}"
-
-
-- name: Get package installation dates from APT logs
-  become: yes
-  shell: >
-    zgrep -B100 'install {{ item }}' /var/log/apt/history.log* | awk '{ $3=""; print $0 }'
-  with_items: "{{ dpkg_output1.stdout_lines }}"
-  register: apt_logs_output
-
-
-
-- name: Display package installation dates
-  debug:
-    msg: "Package: {{ item.item }}, Date: {{ item.stdout | regex_replace('Start-Date: ', '') }}"
-  with_items: "{{ apt_logs_output.results }}"
 
