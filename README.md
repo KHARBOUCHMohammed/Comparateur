@@ -26,16 +26,21 @@ $ ansible-playbook -i host get_installed_packages.yml
 pour lancer le logiciel python il faut avoir les 3 paquets python installés, **tkinter, Pillow et Pandas.** **Et la version Python 3.10.12**
 
 
-Pour installer tkinter faut saisir la commande suivante : 
+Pour installer **tkinter** faut saisir la commande suivante : 
 
 ```sh
 $ sudo apt-get install python3-tk
 ```
 
-pour installer Pillow faut taper la commande suivante :
+pour installer **Pillow** faut taper la commande suivante :
 
 ```sh
 $ sudo apt-get install python3-pil python3-pil.imagetk
+```
+Pour l'installation de pandas faut saisir la commande suivante :
+
+```sh
+$ pip install pandas
 ```
 
 ![Texte alternatif](int1.png "L'interface du logicielle")
