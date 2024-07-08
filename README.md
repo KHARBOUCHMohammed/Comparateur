@@ -1,5 +1,7 @@
 # Logiciel comparateur 
-Logicielle comparateur des paquets installées sur un cluster HPC
+Logiciel de comparaison des paquets installés sur un cluster HPC Niolon
+
+Le but est de comparer les paquets installés sur chaque nœud du cluster HPC Niolon. Cet outil aidera l'administrateur du cluster à vérifier périodiquement l'état de chaque nœud et à ajouter les paquets manquants pour les prochaines mises à jour. En ajoutant ces paquets dans le script Ansible qui déploie le cluster, il s'assurera qu'il n'y a aucune différence entre les paquets installés sur les différents nœuds du cluster HPC Niolon.
 
 ## Ansible
 Vous devez d’abord lancer le script ansible **get_installed_packages.yml** en tant que **root**, vous devez avoir la **version 8.2.0** de **Ansible** pour lancer la récupération des paquets installés. Et comme résultat vous aurez un dossier qui s’appelle **output** où il y a les différents fichiers . Txt
